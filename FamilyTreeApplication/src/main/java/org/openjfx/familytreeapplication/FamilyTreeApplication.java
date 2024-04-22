@@ -1,23 +1,28 @@
 package org.openjfx.familytreeapplication;
 
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-
 import java.io.IOException;
+import javafx.application.Application;
+import javafx.stage.Stage;
+import org.openjfx.familytreeapplication.database.SQLiteJDBC;
+import org.openjfx.familytreeapplication.pages.FamilyTreeProfile;
 
 public class FamilyTreeApplication extends Application {
-    @Override
-    public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(FamilyTreeApplication.class.getResource("hello-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 320, 240);
-        stage.setTitle("Hello!");
-        stage.setScene(scene);
-        stage.show();
-    }
 
-    public static void main(String[] args) {
-        launch();
-    }
+  private static final SQLiteJDBC database = new SQLiteJDBC();
+
+  public static SQLiteJDBC getDatabase() {
+    return database;
+  }
+
+  public static void main(String[] args) {
+    launch();
+  }
+
+  @Override
+  public void start(Stage stage) throws IOException {
+    FamilyTreeProfile familyTreeProfile = new FamilyTreeProfile();
+    familyTreeProfile.showProfile(stage);
+    stage.setTitle("Family Tree Application");
+    stage.show();
+  }
 }

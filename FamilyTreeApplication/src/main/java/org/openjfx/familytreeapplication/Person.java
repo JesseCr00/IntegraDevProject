@@ -9,7 +9,6 @@ public abstract class Person {
   private final String gender;
   private final String dateOfBirth;
   private final int personID;
-  private String dateOfDeath;
   private ArrayList<Person> parents;
   private ArrayList<Person> partners;
   private ArrayList<Person> children;
@@ -20,6 +19,6 @@ public abstract class Person {
     this.lastName = lastName;
     this.gender = gender;
     this.dateOfBirth = dateOfBirth;
-    this.personID = personID; // TODO hange this to unique ID
+    this.personID = personID;
   }
 }
