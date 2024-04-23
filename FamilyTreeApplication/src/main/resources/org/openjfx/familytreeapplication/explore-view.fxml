@@ -43,67 +43,58 @@
 <VBox prefHeight="400.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/21"
   xmlns:fx="http://javafx.com/fxml/1"
   fx:controller="org.openjfx.familytreeapplication.controllers.ExploreController">
-  <children>
-    <ToolBar prefHeight="40.0" prefWidth="200.0">
-      <items>
-        <Button mnemonicParsing="false" text="Profile" onAction="#onProfileButtonClick"
-          fx:id="profileButton"/>
-        <Button mnemonicParsing="false" text="List View" onAction="#onListViewButtonClick"
-          fx:id="listViewButton"/>
-        <Button defaultButton="true" mnemonicParsing="false" text="Explore View"/>
-      </items>
-    </ToolBar>
-    <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0"
-      VBox.vgrow="ALWAYS">
-      <children>
-        <VBox prefHeight="360.0" prefWidth="640.0">
-          <children>
-            <Label text="User Profile">
-              <font>
-                <Font name="System Bold" size="24.0"/>
-              </font>
-              <padding>
-                <Insets bottom="10.0"/>
-              </padding>
-            </Label>
-            <Label text="First Name"/>
-            <TextField>
-              <VBox.margin>
-                <Insets bottom="5.0"/>
-              </VBox.margin>
-            </TextField>
-            <Label text="Last Name"/>
-            <TextField>
-              <VBox.margin>
-                <Insets bottom="5.0"/>
-              </VBox.margin>
-            </TextField>
-            <Label text="Date of Birth"/>
-            <TextField>
-              <VBox.margin>
-                <Insets bottom="5.0"/>
-              </VBox.margin>
-            </TextField>
-            <Label text="Gender"/>
-            <TextField>
-              <VBox.margin>
-                <Insets bottom="5.0"/>
-              </VBox.margin>
-            </TextField>
-            <Button mnemonicParsing="false" text="Update Details" textAlignment="CENTER">
-              <VBox.margin>
-                <Insets top="10.0"/>
-              </VBox.margin>
-            </Button>
-          </children>
-          <opaqueInsets>
-            <Insets/>
-          </opaqueInsets>
-          <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-          </padding>
-        </VBox>
-      </children>
-    </AnchorPane>
-  </children>
+  <ToolBar prefHeight="40.0" prefWidth="200.0">
+    <Button mnemonicParsing="false" text="Profile" onAction="#onProfileButtonClick"
+      fx:id="profileButton"/>
+    <Button mnemonicParsing="false" text="List View" onAction="#onListViewButtonClick"
+      fx:id="listViewButton"/>
+    <Button defaultButton="true" mnemonicParsing="false" text="Explore View"/>
+  </ToolBar>
+  <AnchorPane VBox.vgrow="ALWAYS">
+    <VBox prefHeight="360.0" prefWidth="640.0">
+      <opaqueInsets>
+        <Insets/>
+      </opaqueInsets>
+      <padding>
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+      </padding>
+      <Label text="User Profile">
+        <font>
+          <Font name="System Bold" size="24.0"/>
+        </font>
+        <padding>
+          <Insets bottom="10.0"/>
+        </padding>
+      </Label>
+      <Label text="First Name"/>
+      <TextField>
+        <VBox.margin>
+          <Insets bottom="5.0"/>
+        </VBox.margin>
+      </TextField>
+      <Label text="Last Name"/>
+      <TextField>
+        <VBox.margin>
+          <Insets bottom="5.0"/>
+        </VBox.margin>
+      </TextField>
+      <Label text="Date of Birth"/>
+      <TextField>
+        <VBox.margin>
+          <Insets bottom="5.0"/>
+        </VBox.margin>
+      </TextField>
+      <Label text="Gender"/>
+      <TextField>
+        <VBox.margin>
+          <Insets bottom="5.0"/>
+        </VBox.margin>
+      </TextField>
+      <Button mnemonicParsing="false" text="Update Details" textAlignment="CENTER">
+        <VBox.margin>
+          <Insets top="10.0"/>
+        </VBox.margin>
+      </Button>
+    </VBox>
+  </AnchorPane>
 </VBox>

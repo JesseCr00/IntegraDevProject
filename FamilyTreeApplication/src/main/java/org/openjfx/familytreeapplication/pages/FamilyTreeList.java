@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.openjfx.familytreeapplication.FamilyTreeApplication;
+import org.openjfx.familytreeapplication.controllers.ListController;
 
 public class FamilyTreeList {
 
@@ -14,6 +15,7 @@ public class FamilyTreeList {
     FXMLLoader fxmlLoader = new FXMLLoader(
         FamilyTreeApplication.class.getResource("list-view.fxml"));
     listScene = new Scene(fxmlLoader.load(), 640, 400);
+    //ListController.populateTable();
   }
 
   public void showList(Stage stage) {

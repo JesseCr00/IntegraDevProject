@@ -41,27 +41,22 @@
 <?import javafx.scene.layout.VBox?>
 
 <VBox prefHeight="400.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.familytreeapplication.controllers.ListController">
-  <children>
-      <ToolBar prefHeight="40.0" prefWidth="200.0">
-        <items>
-          <Button fx:id="profileButton" mnemonicParsing="false" onAction="#onProfileButtonClick" text="Profile" />
-            <Button defaultButton="true" mnemonicParsing="false" text="List View" />
-            <Button fx:id="exploreViewButton" mnemonicParsing="false" onAction="#onExploreViewButtonClick" text="Explore View" />
-            <Separator opacity="0.0" prefHeight="29.0" prefWidth="320.0" />
-            <Button fx:id="addPersonButton" mnemonicParsing="false" onAction="#onAddPersonButtonClick" text="Add Person" />
-        </items>
-      </ToolBar>
-    <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
-         <children>
-            <TreeTableView prefHeight="360.0" prefWidth="640.0">
-              <columns>
-                <TreeTableColumn prefWidth="75.0" text="Name" />
-                <TreeTableColumn prefWidth="75.0" text="Relation" />
-                  <TreeTableColumn prefWidth="75.0" text="DOB" />
-                  <TreeTableColumn prefWidth="75.0" text="Gender" />
-              </columns>
-            </TreeTableView>
-         </children>
-    </AnchorPane>
-  </children>
+  <ToolBar prefHeight="40.0" prefWidth="200.0">
+    <Button fx:id="profileButton" mnemonicParsing="false" onAction="#onProfileButtonClick" text="Profile" />
+    <Button defaultButton="true" mnemonicParsing="false" text="List View" />
+    <Button fx:id="exploreViewButton" mnemonicParsing="false" onAction="#onExploreViewButtonClick" text="Explore View" />
+    <Separator opacity="0.0" prefHeight="29.0" prefWidth="320.0" />
+    <Button fx:id="addPersonButton" mnemonicParsing="false" onAction="#onAddPersonButtonClick" text="Add Person" />
+  </ToolBar>
+  <AnchorPane VBox.vgrow="ALWAYS">
+    <TreeTableView fx:id="listViewTable" prefHeight="360.0" prefWidth="640.0">
+      <columns>
+        <TreeTableColumn fx:id="nameCol" prefWidth="75.0" text="firstName" />
+            <TreeTableColumn fx:id="nameCol1" prefWidth="75.0" text="lastName" />
+        <TreeTableColumn fx:id="relationCol" prefWidth="75.0" text="relation" />
+        <TreeTableColumn fx:id="dobCol" prefWidth="75.0" text="DOB" />
+        <TreeTableColumn fx:id="genderCol" prefWidth="75.0" text="Gender" />
+      </columns>
+    </TreeTableView>
+  </AnchorPane>
 </VBox>
