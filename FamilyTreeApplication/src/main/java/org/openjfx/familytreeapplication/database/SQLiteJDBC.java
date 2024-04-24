@@ -8,9 +8,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
+import org.openjfx.familytreeapplication.DateFormatterUtil;
 import org.openjfx.familytreeapplication.Person;
 
 public class SQLiteJDBC {
@@ -68,32 +68,36 @@ public class SQLiteJDBC {
     }
   }
 
-  public void insertPerson(String firstName, String lastName, Date dateOfBirth,
+  public void insertPerson(String firstName, String lastName, String dateOfBirth,
       String gender,
       String personRelatedToID, String relation) {
 
     try {
       openConnection();
       String uniqueID = UUID.randomUUID().toString();
-      String dateOfBirthParsed = dateFormat.format(dateOfBirth);
+      String dateOfBirthParsed = DateFormatterUtil.ausFormToDatabaseForm(dateOfBirth);
       String sql = "INSERT INTO PERSON (PERSON_ID, FIRST_NAME, LAST_NAME, GENDER, DATE_OF_BIRTH) " +
-          "VALUES (" + uniqueID + ", '" + firstName + "', '" + lastName + "', '" + gender + "', '"
+          "VALUES ('" + uniqueID + "', '" + firstName + "', '" + lastName + "', '" + gender + "', '"
           + dateOfBirthParsed + "' );";
+      assert stmt != null;
       stmt.executeUpdate(sql);
       if (relation == "Parent") {
         sql = "INSERT INTO PARENT (PARENT_ID, PERSON_ID, PARENT_PERSON_ID) " +
-            "VALUES ('" + UUID.randomUUID().toString() + "', '" + uniqueID + "', '" + personRelatedToID
-            +  "');";
+            "VALUES ('" + UUID.randomUUID() + "', '" + uniqueID + "', '"
+            + personRelatedToID
+            + "');";
         stmt.executeUpdate(sql);
       } else if (relation == "Spouse") {
         sql = "INSERT INTO MARRIAGE (MARRIAGE_ID, PERSON_ID, MARRIAGE_PERSON_ID) " +
-            "VALUES ('" + UUID.randomUUID().toString() + "', '" + uniqueID + "', '" + personRelatedToID
+            "VALUES ('" + UUID.randomUUID() + "', '" + uniqueID + "', '"
+            + personRelatedToID
             + "');";
         stmt.executeUpdate(sql);
       } else if (relation == "Child") {
         sql = "INSERT INTO PARENT (PARENT_ID, PERSON_ID, PARENT_PERSON_ID) " +
-            "VALUES ('" + UUID.randomUUID().toString() + "', '" + personRelatedToID + "', '" + uniqueID
-            +  "');";
+            "VALUES ('" + UUID.randomUUID() + "', '" + personRelatedToID + "', '"
+            + uniqueID
+            + "');";
         stmt.executeUpdate(sql);
       } else {
         logger.info("Invalid relation");
@@ -106,19 +110,20 @@ public class SQLiteJDBC {
     }
   }
 
-  public void updateUser(String firstName, String lastName, Date dateOfBirth,
+  public void updateUser(String firstName, String lastName, String dateOfBirth,
       String gender) {
     try {
       openConnection();
-      String dateOfBirthParsed = dateFormat.format(dateOfBirth);
+      String dateOfBirthParsed = DateFormatterUtil.ausFormToDatabaseForm(dateOfBirth);
       String sql = "UPDATE PERSON "
           + "SET FIRST_NAME = '" + firstName + "', LAST_NAME = '" + lastName
           + "', DATE_OF_BIRTH = '"
           + dateOfBirthParsed + "', GENDER = '" + gender + "' WHERE PERSON_ID = " + USER_ID + "; ";
+      assert stmt != null;
       stmt.executeUpdate(sql);
     } catch (Exception e) {
       try {
-        String dateOfBirthParsed = dateFormat.format(dateOfBirth);
+        String dateOfBirthParsed = DateFormatterUtil.ausFormToDatabaseForm(dateOfBirth);
         String sql =
             "INSERT INTO PERSON (PERSON_ID, FIRST_NAME, LAST_NAME, GENDER, DATE_OF_BIRTH) " +
                 "VALUES ('0', '" + firstName + "', '" + lastName + "', '" + gender + "', '"
@@ -139,11 +144,13 @@ public class SQLiteJDBC {
     Person person = null;
     try {
       openConnection();
-      String sql = "SELECT * FROM PERSON WHERE PERSON_ID = " + personID + ";";
+      String sql = "SELECT * FROM PERSON WHERE PERSON_ID = '" + personID + "';";
       assert stmt != null;
       ResultSet userInfo = stmt.executeQuery(sql);
       person = new Person(userInfo.getString("FIRST_NAME"), userInfo.getString("LAST_NAME"),
-          userInfo.getString("GENDER"), userInfo.getString("DATE_OF_BIRTH"), userInfo.getString("PERSON_ID"));
+          userInfo.getString("GENDER"), userInfo.getString("DATE_OF_BIRTH"),
+          userInfo.getString("PERSON_ID"));
+      userInfo.close();
     } catch (Exception e) {
       logger.info(e.getMessage());
       System.exit(0);
@@ -154,22 +161,20 @@ public class SQLiteJDBC {
   }
 
   public ArrayList<Person> getParents(String personID) {
-    Person parent1 = null;
-    Person parent2 = null;
     ArrayList<Person> parentList = new ArrayList<>();
     try {
       openConnection();
       // Get Parent IDs
-      String sql = "SELECT PARENT_PERSON_ID FROM PARENT WHERE PERSON_ID = " + personID + ";";
+      String sql = "SELECT * FROM PARENT WHERE PERSON_ID = '" + personID + "';";
+      assert stmt != null;
       ResultSet parentInfo = stmt.executeQuery(sql);
       // Get Parents as Person Objects
-      String parentID1 = parentInfo.getString("PARENT_PERSON_ID");
-      parentInfo.next();
-      String parentID2= parentInfo.getString("PARENT_PERSON_ID");
-      parent1 = getPerson(parentID1);
-      parent2 = getPerson(parentID2);
-      parentList.add(parent1);
-      parentList.add(parent2);
+      while (parentInfo.next()) {
+        String parentIDN = parentInfo.getString("PARENT_PERSON_ID");
+        Person parentN = getPerson(parentIDN);
+        parentList.add(parentN);
+      }
+      parentInfo.close();
     } catch (Exception e) {
       logger.info(e.getMessage());
       System.exit(0);
@@ -177,6 +182,54 @@ public class SQLiteJDBC {
       closeConnection();
     }
     return parentList;
+  }
+
+  public ArrayList<Person> getChildren(String personID) {
+    ArrayList<Person> childList = new ArrayList<>();
+    try {
+      openConnection();
+      // Get Child IDs
+      String sql = "SELECT * FROM PARENT WHERE PARENT_PERSON_ID = '" + personID + "';";
+      assert stmt != null;
+      ResultSet childInfo = stmt.executeQuery(sql);
+      // Get Children as Person Objects
+      while (childInfo.next()) {
+        String childIDN = childInfo.getString("PERSON_ID");
+        Person childN = getPerson(childIDN);
+        childList.add(childN);
+      }
+      childInfo.close();
+    } catch (Exception e) {
+      logger.info(e.getMessage());
+      System.exit(0);
+    } finally {
+      closeConnection();
+    }
+    return childList;
+  }
+
+  public ArrayList<Person> getSpouse(String personID) {
+    ArrayList<Person> spouseList = new ArrayList<>();
+    try {
+      openConnection();
+      // Get Spouse IDs
+      String sql = "SELECT * FROM MARRIAGE WHERE PERSON_ID = '" + personID + "';";
+      assert stmt != null;
+      ResultSet spouseInfo = stmt.executeQuery(sql);
+      // Get Spouse as Person Objects
+      while (spouseInfo.next()) {
+        String spouseIDN = spouseInfo.getString("MARRIAGE_PERSON_ID");
+        Person spouseN = getPerson(spouseIDN);
+        spouseList.add(spouseN);
+      }
+      spouseInfo.close();
+    } catch (Exception e) {
+      logger.info(e.getMessage());
+      System.exit(0);
+    } finally {
+      closeConnection();
+    }
+    return spouseList;
   }
 
   public void openConnection() {
@@ -194,9 +247,36 @@ public class SQLiteJDBC {
     try {
       stmt.close();
       c.close();
+      stmt = null;
+      c = null;
     } catch (Exception e) {
       logger.info(e.getMessage());
       System.exit(0);
     }
   }
+
+  public ArrayList<Person> getAllPeople() {
+    ArrayList<Person> people = new ArrayList<>();
+    try {
+      openConnection();
+      String sql = "SELECT * FROM PERSON;";
+      assert stmt != null;
+      ResultSet peopleInfo = stmt.executeQuery(sql);
+      while (peopleInfo.next()) {
+        Person person = new Person(peopleInfo.getString("FIRST_NAME"),
+            peopleInfo.getString("LAST_NAME"),
+            peopleInfo.getString("DATE_OF_BIRTH"), peopleInfo.getString("GENDER"),
+            peopleInfo.getString("PERSON_ID"));
+        people.add(person);
+      }
+      peopleInfo.close();
+    } catch (Exception e) {
+      logger.info(e.getMessage());
+      System.exit(0);
+    } finally {
+      closeConnection();
+    }
+    return people;
+  }
+
 }

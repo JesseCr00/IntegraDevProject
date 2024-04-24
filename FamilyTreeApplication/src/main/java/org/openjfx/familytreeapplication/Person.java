@@ -9,10 +9,10 @@ public class Person {
   private final String gender;
   private final String dateOfBirth;
   private final String personID;
+  private String relation;
   private ArrayList<Person> parents;
   private ArrayList<Person> partners;
   private ArrayList<Person> children;
-
   public Person(String firstName, String lastName, String gender, String dateOfBirth,
       String personID) {
     this.firstName = firstName;
@@ -20,6 +20,18 @@ public class Person {
     this.gender = gender;
     this.dateOfBirth = dateOfBirth;
     this.personID = personID;
+  }
+
+  public String getRelation() {
+    return relation;
+  }
+
+  public void setRelation(String relation) {
+    this.relation = relation;
+  }
+
+  public void setParents(ArrayList<Person> parents) {
+    this.parents = parents;
   }
 
   public String getFirstName() {
