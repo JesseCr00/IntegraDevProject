@@ -12,7 +12,6 @@ import javafx.stage.Stage;
 import org.openjfx.familytreeapplication.FamilyTreeApplication;
 import org.openjfx.familytreeapplication.Person;
 import org.openjfx.familytreeapplication.pages.FamilyTreeAddPerson;
-import org.openjfx.familytreeapplication.pages.FamilyTreeExplore;
 import org.openjfx.familytreeapplication.pages.FamilyTreeProfile;
 
 public class ListController {
@@ -33,18 +32,6 @@ public class ListController {
   private Button addPersonButton;
   @FXML
   private Button profileButton;
-  @FXML
-  private Button exploreViewButton;
-
-  @FXML
-  protected void onExploreViewButtonClick() throws IOException {
-    // Create Family Tree Explore Object
-    FamilyTreeExplore familyTreeExplore = new FamilyTreeExplore();
-    // Get Current Stage
-    Stage currentStage = (Stage) exploreViewButton.getScene().getWindow();
-    // Call function to show new scene
-    familyTreeExplore.showExplore(currentStage);
-  }
 
   @FXML
   protected void onProfileButtonClick() throws IOException {
@@ -105,7 +92,6 @@ public class ListController {
       TreeItem parentsSub = getParents(parentNID);
       // Add parents of parent to hierarchy
       parentN.getChildren().add(parentsSub);
-      // TODO Add other Children
       // Call children function to get children of parent
       TreeItem childrenSub = getChildren(parentNID, personID);
       // Add children of parent to hierarchy

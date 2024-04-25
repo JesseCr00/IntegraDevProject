@@ -48,8 +48,6 @@
     <Button defaultButton="true" mnemonicParsing="false" text="Profile"/>
     <Button fx:id="listViewButton" mnemonicParsing="false" onAction="#onListViewButtonClick"
       text="List View"/>
-    <Button fx:id="exploreViewButton" mnemonicParsing="false" onAction="#onExploreViewButtonClick"
-      text="Explore View"/>
   </ToolBar>
   <AnchorPane VBox.vgrow="ALWAYS">
     <VBox prefHeight="360.0" prefWidth="640.0">

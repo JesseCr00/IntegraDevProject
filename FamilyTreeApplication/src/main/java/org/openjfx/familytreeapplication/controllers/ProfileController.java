@@ -1,11 +1,7 @@
 package org.openjfx.familytreeapplication.controllers;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,7 +11,6 @@ import javafx.stage.Stage;
 import org.openjfx.familytreeapplication.DateFormatterUtil;
 import org.openjfx.familytreeapplication.FamilyTreeApplication;
 import org.openjfx.familytreeapplication.Person;
-import org.openjfx.familytreeapplication.pages.FamilyTreeExplore;
 import org.openjfx.familytreeapplication.pages.FamilyTreeList;
 
 public class ProfileController {
@@ -30,8 +25,6 @@ public class ProfileController {
   public TextField firstNameText;
   @FXML
   private Button listViewButton;
-  @FXML
-  private Button exploreViewButton;
   @FXML
   private Button updateDetailsButton;
   @FXML
@@ -48,17 +41,7 @@ public class ProfileController {
   }
 
   @FXML
-  protected void onExploreViewButtonClick() throws IOException {
-    // Create Family Tree Explore Object
-    FamilyTreeExplore familyTreeExplore = new FamilyTreeExplore();
-    // Get Current Stage
-    Stage currentStage = (Stage) exploreViewButton.getScene().getWindow();
-    // Call function to show new scene
-    familyTreeExplore.showExplore(currentStage);
-  }
-
-  @FXML
-  protected void onUpdateDetailsButtonClick() throws ParseException {
+  protected void onUpdateDetailsButtonClick() {
     FamilyTreeApplication.getDatabase()
         .updateUser(firstNameText.getText(), lastNameText.getText(), dateOfBirthText.getText(), genderText.getText());
     successLabel.setTextFill(Color.GREEN);

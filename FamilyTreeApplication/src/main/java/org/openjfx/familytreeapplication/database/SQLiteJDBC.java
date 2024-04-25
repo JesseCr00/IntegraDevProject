@@ -81,19 +81,19 @@ public class SQLiteJDBC {
           + dateOfBirthParsed + "' );";
       assert stmt != null;
       stmt.executeUpdate(sql);
-      if (relation == "Parent") {
+      if (relation.equals("Parent")) {
         sql = "INSERT INTO PARENT (PARENT_ID, PERSON_ID, PARENT_PERSON_ID) " +
             "VALUES ('" + UUID.randomUUID() + "', '" + uniqueID + "', '"
             + personRelatedToID
             + "');";
         stmt.executeUpdate(sql);
-      } else if (relation == "Spouse") {
+      } else if (relation.equals("Spouse")) {
         sql = "INSERT INTO MARRIAGE (MARRIAGE_ID, PERSON_ID, MARRIAGE_PERSON_ID) " +
             "VALUES ('" + UUID.randomUUID() + "', '" + uniqueID + "', '"
             + personRelatedToID
             + "');";
         stmt.executeUpdate(sql);
-      } else if (relation == "Child") {
+      } else if (relation.equals("Child")) {
         sql = "INSERT INTO PARENT (PARENT_ID, PERSON_ID, PARENT_PERSON_ID) " +
             "VALUES ('" + UUID.randomUUID() + "', '" + personRelatedToID + "', '"
             + uniqueID

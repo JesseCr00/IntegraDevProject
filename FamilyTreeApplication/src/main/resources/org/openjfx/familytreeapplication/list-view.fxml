@@ -44,7 +44,6 @@
   <ToolBar minHeight="40.0" minWidth="200.0">
     <Button fx:id="profileButton" mnemonicParsing="false" onAction="#onProfileButtonClick" text="Profile" />
     <Button defaultButton="true" mnemonicParsing="false" text="List View" />
-    <Button fx:id="exploreViewButton" mnemonicParsing="false" onAction="#onExploreViewButtonClick" text="Explore View" />
     <Separator minHeight="29.0" minWidth="320.0" opacity="0.0" />
     <Button fx:id="addPersonButton" mnemonicParsing="false" onAction="#onAddPersonButtonClick" text="Add Person" />
   </ToolBar>
