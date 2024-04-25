@@ -48,21 +48,20 @@ public class AddPersonController {
   public Label spouseMessage;
 
   @FXML
-  public void onAddPersonToTreeButtonClick()
-      throws IOException, InterruptedException {
-    // TODO add logic so you cannot submit untill all categories filled in
+  public void onAddPersonToTreeButtonClick() throws IOException, InterruptedException {
+    // TODO add logic so you cannot submit until all categories filled in
     // TODO input validation
     RadioButton selectedRadio = (RadioButton) relationToggle.getSelectedToggle();
     Person relatedPersonFromBox = personRelated.getValue();
-    if (selectedRadio.getText().equals("Spouse") && !FamilyTreeApplication.getDatabase().getSpouse(relatedPersonFromBox.getPersonID()).isEmpty()) {
+    if (selectedRadio.getText().equals("Spouse") && !FamilyTreeApplication.getDatabase()
+        .getSpouse(relatedPersonFromBox.personID()).isEmpty()) {
       spouseMessage.setText("");
       sleep(200);
       spouseMessage.setText("This person already has a spouse");
     } else {
       FamilyTreeApplication.getDatabase()
           .insertPerson(firstNameText.getText(), lastNameText.getText(), dateOfBirthText.getText(),
-              genderText.getText(),
-              relatedPersonFromBox.getPersonID(), selectedRadio.getText());
+              genderText.getText(), relatedPersonFromBox.personID(), selectedRadio.getText());
       onCancelButtonClick();
     }
   }
@@ -78,17 +77,17 @@ public class AddPersonController {
   }
 
   public void initialize() {
-    Callback<ListView<Person>, ListCell<Person>> cellFactory = new Callback<ListView<Person>, ListCell<Person>>() {
+    Callback<ListView<Person>, ListCell<Person>> cellFactory = new Callback<>() {
       @Override
       public ListCell<Person> call(ListView<Person> l) {
-        return new ListCell<Person>() {
+        return new ListCell<>() {
           @Override
           protected void updateItem(Person person, boolean empty) {
             super.updateItem(person, empty);
             if (person == null || empty) {
               setText("");
             } else {
-              setText(person.getFirstName());
+              setText(person.firstName());
             }
           }
         };

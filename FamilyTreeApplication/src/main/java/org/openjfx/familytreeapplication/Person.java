@@ -1,56 +1,8 @@
 package org.openjfx.familytreeapplication;
 
-import java.util.ArrayList;
+public record Person(String firstName, String lastName, String gender, String dateOfBirth,
+                     String personID, String relation) {
 
-public class Person {
+  // TODO add relationship info, so that we can pass it into the database class, instead of all the separate variables
 
-  private final String firstName;
-  private final String lastName;
-  private final String gender;
-  private final String dateOfBirth;
-  private final String personID;
-  private String relation;
-  private ArrayList<Person> parents;
-  private ArrayList<Person> partners;
-  private ArrayList<Person> children;
-  public Person(String firstName, String lastName, String gender, String dateOfBirth,
-      String personID) {
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.gender = gender;
-    this.dateOfBirth = dateOfBirth;
-    this.personID = personID;
-  }
-
-  public String getRelation() {
-    return relation;
-  }
-
-  public void setRelation(String relation) {
-    this.relation = relation;
-  }
-
-  public void setParents(ArrayList<Person> parents) {
-    this.parents = parents;
-  }
-
-  public String getFirstName() {
-    return firstName;
-  }
-
-  public String getLastName() {
-    return lastName;
-  }
-
-  public String getGender() {
-    return gender;
-  }
-
-  public String getDateOfBirth() {
-    return dateOfBirth;
-  }
-
-  public String getPersonID() {
-    return personID;
-  }
 }

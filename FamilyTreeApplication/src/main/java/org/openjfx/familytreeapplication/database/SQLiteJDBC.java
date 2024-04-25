@@ -4,21 +4,16 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.UUID;
 import java.util.logging.Logger;
 import org.openjfx.familytreeapplication.DateFormatterUtil;
-import org.openjfx.familytreeapplication.FamilyTreeApplication;
 import org.openjfx.familytreeapplication.Person;
 
 public class SQLiteJDBC {
 
   private static final String USER_ID = "0";
-  private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-  Logger logger = Logger.getLogger(getClass().getName());
+  final Logger logger = Logger.getLogger(getClass().getName());
   private Statement stmt;
   private Connection c;
 
@@ -42,6 +37,7 @@ public class SQLiteJDBC {
           "(PARENT_ID STRING PRIMARY KEY     NOT NULL," +
           " PERSON_ID           STRING    NOT NULL, " +
           " PARENT_PERSON_ID            STRING     NOT NULL, " +
+          " RIGHT_SOURCE_OR_DEST            STRING     NOT NULL, " +
           //" RELATIONSHIP        TEXT NOT NULL," +
           "FOREIGN KEY (PERSON_ID) REFERENCES PERSON (PERSON_ID),"
           + "FOREIGN KEY (PARENT_PERSON_ID) REFERENCES PERSON (PERSON_ID))";
@@ -49,12 +45,13 @@ public class SQLiteJDBC {
       sql = "CREATE TABLE IF NOT EXISTS MARRIAGE " +
           "(MARRIAGE_ID STRING PRIMARY KEY     NOT NULL," +
           " PERSON_ID           STRING    NOT NULL, " +
-          " MARRIAGE_PERSON_ID            STRING     NOT NULL,"
+          " MARRIAGE_PERSON_ID            STRING     NOT NULL," +
+          " RIGHT_SOURCE_OR_DEST           STRING     NOT NULL,"
           + "FOREIGN KEY (PERSON_ID) REFERENCES PERSON (PERSON_ID),"
           + "FOREIGN KEY (MARRIAGE_PERSON_ID) REFERENCES PERSON (PERSON_ID))";
       stmt.executeUpdate(sql);
 
-      // TEST DATABASE STUFF HERE
+      // TODO TEST DATABASE STUFF HERE
       /*
       sql = "INSERT INTO PERSON (PERSON_ID, FIRST_NAME, LAST_NAME, GENDER, DATE_OF_BIRTH) " +
           "VALUES (0, 'Jesse', 'Cruickshank', 'Male', '2000-09-22');";
@@ -72,7 +69,6 @@ public class SQLiteJDBC {
   public void insertPerson(String firstName, String lastName, String dateOfBirth,
       String gender,
       String personRelatedToID, String relation) {
-
     try {
       openConnection();
       String uniqueID = UUID.randomUUID().toString();
@@ -82,81 +78,94 @@ public class SQLiteJDBC {
           + dateOfBirthParsed + "' );";
       assert stmt != null;
       stmt.executeUpdate(sql);
-      if (relation.equals("Parent")) {
-        // This is actually adding the new person as Child
-
-        if (isDestinationSpouse(personRelatedToID)) {
-          // If we add a child to a "destination" spouse, this child needs to be added to "source" spouse as a child so it will show
-          ArrayList<Person> spouseList = getSpouse(personRelatedToID);
-          for (Person spouse : spouseList) {
-            // TODO in theory there will be only one spouse but this needs to be fixed
-            sql = "INSERT INTO PARENT (PARENT_ID, PERSON_ID, PARENT_PERSON_ID) " +
+      closeConnection();
+      switch (relation) {
+        case "Parent" -> {
+          // This is actually adding the new person as Child
+          if (isDestinationPerson(personRelatedToID, "SELECT * FROM MARRIAGE WHERE MARRIAGE_PERSON_ID = '")) {
+            // If we add a child to a "destination" spouse, this child needs to be added to "source" spouse as a child so it will show
+            ArrayList<Person> spouseList = getSpouse(personRelatedToID);
+            for (Person spouse : spouseList) {
+              // TODO in theory there will be only one spouse but this needs to be fixed
+              sql = "INSERT INTO PARENT (PARENT_ID, PERSON_ID, PARENT_PERSON_ID, RIGHT_SOURCE_OR_DEST) " +
+                  "VALUES ('" + UUID.randomUUID() + "', '" + uniqueID + "', '"
+                  + spouse.personID() + "', '" + "Source"
+                  + "');";
+              openConnection();
+              stmt.executeUpdate(sql);
+              closeConnection();
+            }
+          } else {
+            sql = "INSERT INTO PARENT (PARENT_ID, PERSON_ID, PARENT_PERSON_ID, RIGHT_SOURCE_OR_DEST) " +
                 "VALUES ('" + UUID.randomUUID() + "', '" + uniqueID + "', '"
-                + spouse.getPersonID()
+                + personRelatedToID + "', '" + "Source"
                 + "');";
+            openConnection();
             stmt.executeUpdate(sql);
+            closeConnection();
           }
-        } else {
-          sql = "INSERT INTO PARENT (PARENT_ID, PERSON_ID, PARENT_PERSON_ID) " +
-              "VALUES ('" + UUID.randomUUID() + "', '" + uniqueID + "', '"
-              + personRelatedToID
-              + "');";
-          stmt.executeUpdate(sql);
         }
-
-      } else if (relation.equals("Spouse")) {
-        // There is code in the controller to stop you from adding multiple spouses.
-        if (isDestinationParent(personRelatedToID)) {
-          // If we add a spouse to a "destination" parent, the spouse needs to be added to the "source" child as a parent so it will show
-          ArrayList<Person> parentList = getParents(personRelatedToID);
-          for (Person parent : parentList) {
-            // TODO in theory there will be only two parents
-            sql = "INSERT INTO PARENT (PARENT_ID, PERSON_ID, PARENT_PERSON_ID) " +
-                "VALUES ('" + UUID.randomUUID() + "', '" + parent.getPersonID() + "', '"
-                + uniqueID
+        case "Spouse" -> {
+          // There is code in the controller to stop you from adding multiple spouses.
+          if (isDestinationPerson(personRelatedToID, "SELECT * FROM PARENT WHERE PARENT_PERSON_ID = '")) {
+            // If we add a spouse to a "destination" parent, the spouse needs to be added to the "source" child as a parent so it will show
+            ArrayList<Person> childList = getChildren(personRelatedToID);
+            for (Person child : childList) {
+              // TODO in theory there will be only two parents
+              sql = "INSERT INTO PARENT (PARENT_ID, PERSON_ID, PARENT_PERSON_ID, RIGHT_SOURCE_OR_DEST) " +
+                  "VALUES ('" + UUID.randomUUID() + "', '" + child.personID() + "', '"
+                  + uniqueID + "', '" + "Dest"
+                  + "');";
+              openConnection();
+              stmt.executeUpdate(sql);
+              closeConnection();
+            }
+          } else {
+            sql = "INSERT INTO MARRIAGE (MARRIAGE_ID, PERSON_ID, MARRIAGE_PERSON_ID, RIGHT_SOURCE_OR_DEST) " +
+                "VALUES ('" + UUID.randomUUID() + "', '" + personRelatedToID + "', '"
+                + uniqueID + "', '" + "Dest"
                 + "');";
+            openConnection();
             stmt.executeUpdate(sql);
+            closeConnection();
           }
-        } else {
-          sql = "INSERT INTO MARRIAGE (MARRIAGE_ID, PERSON_ID, MARRIAGE_PERSON_ID) " +
-              "VALUES ('" + UUID.randomUUID() + "', '" + personRelatedToID + "', '"
-              + uniqueID
-              + "');";
-          stmt.executeUpdate(sql);
         }
-      } else if (relation.equals("Child")) {
-        // This is actually adding the new person as Parent
-        if (isDestinationChild(personRelatedToID)) {
-          // If we add a parent to a "destination" child, the parent needs to be added to the "source" parent as a spouse so it will show
-          ArrayList<Person> childList = getChildren(personRelatedToID);
-          for (Person child : childList) {
-            sql = "INSERT INTO MARRIAGE (MARRIAGE_ID, PERSON_ID, MARRIAGE_PERSON_ID) " +
-                "VALUES ('" + UUID.randomUUID() + "', '" + uniqueID + "', '"
-                + child.getPersonID()
+        case "Child" -> {
+          // This is actually adding the new person as Parent
+          // Check if related person is a "destination" child
+          if (isDestinationPerson(personRelatedToID, "SELECT * FROM PARENT WHERE PERSON_ID = '")) {
+            // If we add a parent to a "destination" child, the parent needs to be added to the "source" parent as a spouse so it will show
+            ArrayList<Person> parentList = getParents(personRelatedToID);
+            for (Person parent: parentList) {
+              sql = "INSERT INTO MARRIAGE (MARRIAGE_ID, PERSON_ID, MARRIAGE_PERSON_ID, RIGHT_SOURCE_OR_DEST) " +
+                  "VALUES ('" + UUID.randomUUID() + "', '" + parent.personID()+ "', '"
+                  + uniqueID + "', '" + "Dest"
+                  + "');";
+              openConnection();
+              stmt.executeUpdate(sql);
+              closeConnection();
+            }
+          } else {
+            sql = "INSERT INTO PARENT (PARENT_ID, PERSON_ID, PARENT_PERSON_ID, RIGHT_SOURCE_OR_DEST) " +
+                "VALUES ('" + UUID.randomUUID() + "', '" + personRelatedToID + "', '"
+                + uniqueID + "', '" + "Dest"
                 + "');";
+            openConnection();
             stmt.executeUpdate(sql);
+            closeConnection();
           }
-        } else {
-          sql = "INSERT INTO PARENT (PARENT_ID, PERSON_ID, PARENT_PERSON_ID) " +
-              "VALUES ('" + UUID.randomUUID() + "', '" + personRelatedToID + "', '"
-              + uniqueID
-              + "');";
-          stmt.executeUpdate(sql);
         }
-      } else {
-        logger.info("Invalid relation");
+        default -> logger.info("Invalid relation");
       }
     } catch (Exception e) {
       logger.info(e.getMessage());
       System.exit(0);
-    } finally {
-      closeConnection();
     }
   }
 
   public void updateUser(String firstName, String lastName, String dateOfBirth,
       String gender) {
-    if (this.getPerson("0") == null) {
+    if (this.getPerson("0", "User") == null) {
       try {
         openConnection();
         String dateOfBirthParsed = DateFormatterUtil.ausFormToDatabaseForm(dateOfBirth);
@@ -191,21 +200,21 @@ public class SQLiteJDBC {
     }
   }
 
-  public Person getPerson(String personID) {
+  public Person getPerson(String personID, String relation) {
     Person person = null;
     try {
       openConnection();
       String sql = "SELECT * FROM PERSON WHERE PERSON_ID = '" + personID + "';";
       assert stmt != null;
       ResultSet userInfo = stmt.executeQuery(sql);
-      if (!userInfo.isBeforeFirst() ) {
+      if (!userInfo.isBeforeFirst()) {
         userInfo.close();
-        return person;
+      } else {
+        person = new Person(userInfo.getString("FIRST_NAME"), userInfo.getString("LAST_NAME"),
+            userInfo.getString("GENDER"), userInfo.getString("DATE_OF_BIRTH"),
+            userInfo.getString("PERSON_ID"), relation);
+        userInfo.close();
       }
-      person = new Person(userInfo.getString("FIRST_NAME"), userInfo.getString("LAST_NAME"),
-          userInfo.getString("GENDER"), userInfo.getString("DATE_OF_BIRTH"),
-          userInfo.getString("PERSON_ID"));
-      userInfo.close();
     } catch (Exception e) {
       logger.info(e.getMessage());
       System.exit(0);
@@ -224,21 +233,19 @@ public class SQLiteJDBC {
       String sql = "SELECT * FROM PARENT WHERE PERSON_ID = '" + personID + "';";
       assert stmt != null;
       ResultSet parentInfo = stmt.executeQuery(sql);
-      // Get Parents as Person Objects
       while (parentInfo.next()) {
         parentIDs.add(parentInfo.getString("PARENT_PERSON_ID"));
       }
       parentInfo.close();
-
-
     } catch (Exception e) {
       logger.info(e.getMessage());
       System.exit(0);
     } finally {
       closeConnection();
     }
+    // Get Parents as Person Objects
     for (String parentIDN : parentIDs) {
-      Person parentN = getPerson(parentIDN);
+      Person parentN = getPerson(parentIDN, "Parent");
       parentList.add(parentN);
     }
     return parentList;
@@ -253,7 +260,6 @@ public class SQLiteJDBC {
       String sql = "SELECT * FROM PARENT WHERE PARENT_PERSON_ID = '" + personID + "';";
       assert stmt != null;
       ResultSet childInfo = stmt.executeQuery(sql);
-      // Get Children as Person Objects
       while (childInfo.next()) {
         childIDs.add(childInfo.getString("PERSON_ID"));
       }
@@ -265,8 +271,9 @@ public class SQLiteJDBC {
     } finally {
       closeConnection();
     }
+    // Get Children as Person Objects
     for (String childIDN : childIDs) {
-      Person childN = getPerson(childIDN);
+      Person childN = getPerson(childIDN, "Child");
       childList.add(childN);
     }
     return childList;
@@ -281,7 +288,6 @@ public class SQLiteJDBC {
       String sql = "SELECT * FROM MARRIAGE WHERE PERSON_ID = '" + personID + "';";
       assert stmt != null;
       ResultSet spouseInfo = stmt.executeQuery(sql);
-      // Get Spouse as Person Objects
       while (spouseInfo.next()) {
         spouseIDs.add(spouseInfo.getString("MARRIAGE_PERSON_ID"));
       }
@@ -292,8 +298,9 @@ public class SQLiteJDBC {
     } finally {
       closeConnection();
     }
+    // Get Spouse as Person Objects
     for (String spouseIDN : spouseIDs) {
-      Person spouseN = getPerson(spouseIDN);
+      Person spouseN = getPerson(spouseIDN, "Spouse");
       spouseList.add(spouseN);
     }
     return spouseList;
@@ -333,7 +340,7 @@ public class SQLiteJDBC {
         Person person = new Person(peopleInfo.getString("FIRST_NAME"),
             peopleInfo.getString("LAST_NAME"),
             peopleInfo.getString("DATE_OF_BIRTH"), peopleInfo.getString("GENDER"),
-            peopleInfo.getString("PERSON_ID"));
+            peopleInfo.getString("PERSON_ID"), "None");
         people.add(person);
       }
       peopleInfo.close();
@@ -345,74 +352,36 @@ public class SQLiteJDBC {
     }
     return people;
   }
-
-  public boolean isDestinationParent(String parentID) {
-    boolean destinationParentStatus = false;
+  /**
+   * Check if a person is a destination person.
+   * This means that they are on the right side of the relationship for at least 1 record
+   *
+   * @param personID ID of person to check
+   * @param sqlSearch SQL search string with appropriate WHERE clause
+   * @return boolean
+   */
+  public boolean isDestinationPerson(String personID, String sqlSearch) {
+    boolean destinationPersonStatus = false;
     try {
       openConnection();
-      // Get Parent IDs
-      String sql = "SELECT * FROM PARENT WHERE PARENT_PERSON_ID = '" + parentID + "';";
+      // Get Person IDs
+      String sql = sqlSearch + personID + "';";
       assert stmt != null;
-      ResultSet parentInfo = stmt.executeQuery(sql);
+      ResultSet personInfo = stmt.executeQuery(sql);
       // Get Parents as Person Objects
-      while (parentInfo.next()) {
-        destinationParentStatus = true;
-        break;
+      while (personInfo.next()) {
+        if (personInfo.getString("RIGHT_SOURCE_OR_DEST").equals("Dest")) {
+          destinationPersonStatus = true;
+          break;
+        }
       }
-      parentInfo.close();
+      personInfo.close();
     } catch (Exception e) {
       logger.info(e.getMessage());
       System.exit(0);
     } finally {
       closeConnection();
     }
-    return destinationParentStatus;
+    return destinationPersonStatus;
   }
-
-  public boolean isDestinationSpouse(String spouseID) {
-    boolean destinationSpouseStatus = false;
-    try {
-      openConnection();
-      // Get Spouse IDs
-      String sql = "SELECT * FROM MARRIAGE WHERE MARRIAGE_PERSON_ID = '" + spouseID + "';";
-      assert stmt != null;
-      ResultSet spouseInfo = stmt.executeQuery(sql);
-      // Get Spouse as Person Objects
-      while (spouseInfo.next()) {
-        destinationSpouseStatus = true;
-        break;
-      }
-      spouseInfo.close();
-    } catch (Exception e) {
-      logger.info(e.getMessage());
-      System.exit(0);
-    } finally {
-      closeConnection();
-    }
-    return destinationSpouseStatus;
-  }
-
-  public boolean isDestinationChild(String childID) {
-    boolean destinationChildStatus = false;
-    try {
-      openConnection();
-      // Get Child IDs
-      String sql = "SELECT * FROM PARENT WHERE PERSON_ID = '" + childID + "';";
-      assert stmt != null;
-      ResultSet childInfo = stmt.executeQuery(sql);
-      // Get Children as Person Objects
-      while (childInfo.next()) {
-        destinationChildStatus = true;
-        break;
-      }
-      childInfo.close();
-    } catch (Exception e) {
-      logger.info(e.getMessage());
-      System.exit(0);
-    } finally {
-      closeConnection();
-    }
-    return destinationChildStatus;
-  }
-
 }

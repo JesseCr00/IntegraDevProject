@@ -93,7 +93,6 @@
                <Insets top="5.0" />
             </VBox.margin></Label>
          <SplitPane dividerPositions="0.1521, 0.3099" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: TRANSPARENT;">
-            <items>
                <RadioButton fx:id="fatherToggle" mnemonicParsing="false" prefWidth="118.0" text="Parent">
                   <toggleGroup>
                      <ToggleGroup fx:id="relationToggle" />
@@ -101,18 +100,15 @@
                </RadioButton>
                <RadioButton fx:id="spouseToggle" mnemonicParsing="false" prefWidth="118.0" text="Spouse" toggleGroup="$relationToggle" />
                <RadioButton fx:id="sonToggle" mnemonicParsing="false" prefWidth="118.0" text="Child" toggleGroup="$relationToggle" />
-            </items>
          </SplitPane>
          <SplitPane dividerPositions="0.5" prefHeight="200.0" prefWidth="200.0" scaleShape="false" style="-fx-background-color: TRANSPARENT;">
-            <items>
                <Button fx:id="addPersonToTreeButton" mnemonicParsing="false" onAction="#onAddPersonToTreeButtonClick" text="Add Person to Tree" textAlignment="CENTER" />
                <Button fx:id="cancelButton" cancelButton="true" mnemonicParsing="false" onAction="#onCancelButtonClick" text="Cancel" textAlignment="CENTER" />
-            </items>
             <VBox.margin>
                <Insets top="10.0" />
             </VBox.margin>
          </SplitPane>
-         <Label fx:id="spouseMessage" text="">
+         <Label fx:id="spouseMessage">
             <VBox.margin>
                <Insets top="5.0" />
             </VBox.margin></Label>

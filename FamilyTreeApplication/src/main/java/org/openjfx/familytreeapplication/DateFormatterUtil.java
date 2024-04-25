@@ -8,7 +8,8 @@ import java.util.Locale;
 
 public final class DateFormatterUtil {
 
-  private DateFormatterUtil() {}
+  private DateFormatterUtil() {
+  }
 
   public static String databaseFormToAusForm(String dateString) throws ParseException {
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
