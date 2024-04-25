@@ -42,6 +42,7 @@ public class ProfileController {
 
   @FXML
   protected void onUpdateDetailsButtonClick() {
+    // TODO input validation
     FamilyTreeApplication.getDatabase()
         .updateUser(firstNameText.getText(), lastNameText.getText(), dateOfBirthText.getText(), genderText.getText());
     successLabel.setTextFill(Color.GREEN);
@@ -59,10 +60,12 @@ public class ProfileController {
   @FXML
   protected void initialize() throws ParseException {
     Person user = FamilyTreeApplication.getDatabase().getPerson("0");
-    firstNameText.setText(user.getFirstName());
-    lastNameText.setText(user.getLastName());
-    String formattedDate = DateFormatterUtil.databaseFormToAusForm(user.getDateOfBirth());
-    dateOfBirthText.setText(formattedDate);
-    genderText.setText(user.getGender());
+    if (user != null) {
+      firstNameText.setText(user.getFirstName());
+      lastNameText.setText(user.getLastName());
+      String formattedDate = DateFormatterUtil.databaseFormToAusForm(user.getDateOfBirth());
+      dateOfBirthText.setText(formattedDate);
+      genderText.setText(user.getGender());
+    }
   }
 }

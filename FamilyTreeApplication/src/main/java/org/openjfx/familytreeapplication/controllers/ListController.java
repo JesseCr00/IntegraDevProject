@@ -60,42 +60,53 @@ public class ListController {
     dobCol.setCellValueFactory(new TreeItemPropertyValueFactory<>("dateOfBirth"));
     genderCol.setCellValueFactory(new TreeItemPropertyValueFactory<>("gender"));
     // Get user
-    String userID = FamilyTreeApplication.getDatabase().getPerson("0").getPersonID();
-    TreeItem user = new TreeItem(FamilyTreeApplication.getDatabase().getPerson("0"));
+    String userID = "0";
+    TreeItem<Person> user = new TreeItem(FamilyTreeApplication.getDatabase().getPerson("0"));
     // Get Parents
-    TreeItem parents = getParents(userID);
-    user.getChildren().add(parents);
+    TreeItem<Person> parents = getParentsFT(userID);
+    if (parents.getChildren().size() != 0) {
+      user.getChildren().add(parents);
+    }
     // Get Spouse
-    TreeItem spouse = getSpouse(userID);
-    user.getChildren().add(spouse);
+    TreeItem<Person> spouse = getSpouseFT(userID);
+    if (spouse.getChildren().size() != 0) {
+      user.getChildren().add(spouse);
+    }
     // Get Children
-    TreeItem children = getChildren(userID, null);
-    user.getChildren().add(children);
+    TreeItem<Person> children = getChildrenFT(userID, null);
+    if (children.getChildren().size() != 0) {
+      user.getChildren().add(children);
+    }
     // Set Table Root
     listViewTable.setRoot(user);
   }
 
-  public TreeItem getParents(String personID) {
+  public TreeItem<Person> getParentsFT(String personID) {
     // Get 0, 1 or 2 parents
     // run get parent, get other children
     // Create Header
-    TreeItem parents = new TreeItem(new Person("Parents", "...", "...", "...", "..."));
+    // TODO I am not sure if this is improper use of an object.
+    TreeItem<Person> parents = new TreeItem(new Person("Parents", "...", "...", "...", "..."));
     // Get list of Parent Person Objects
     ArrayList<Person> parentList = FamilyTreeApplication.getDatabase().getParents(personID);
     // For each non-null parent object, find their parents, and other children, and add them too
     for (Person parent : parentList) {
       parent.setRelation("Parent");
       // Create TreeItem for Parent
-      TreeItem parentN = new TreeItem(parent);
+      TreeItem<Person> parentN = new TreeItem(parent);
       String parentNID = parent.getPersonID();
       // Call this current function to get parents of parent
-      TreeItem parentsSub = getParents(parentNID);
+      TreeItem<Person> parentsSub = getParentsFT(parentNID);
       // Add parents of parent to hierarchy
-      parentN.getChildren().add(parentsSub);
+      if (!parentsSub.getChildren().isEmpty()) {
+        parentN.getChildren().add(parentsSub);
+      }
       // Call children function to get children of parent
-      TreeItem childrenSub = getChildren(parentNID, personID);
+      TreeItem<Person> childrenSub = getChildrenFT(parentNID, personID);
       // Add children of parent to hierarchy
-      parentN.getChildren().add(childrenSub);
+      if (!childrenSub.getChildren().isEmpty()) {
+        parentN.getChildren().add(childrenSub);
+      }
       // Add Parent 1 Tree Item
       parents.getChildren().add(parentN);
     }
@@ -107,26 +118,30 @@ public class ListController {
    * @param personID ID of person to get children of
    * @return TreeItem of children
    */
-  public TreeItem getChildren(String personID, String callingChildID) {
+  public TreeItem<Person> getChildrenFT(String personID, String callingChildID) {
     // Get however many children
     // Run get spouse, children
-    TreeItem children = new TreeItem(new Person("Children", "...", "...", "...", "..."));
+    TreeItem<Person> children = new TreeItem(new Person("Children", "...", "...", "...", "..."));
     ArrayList<Person> childList = FamilyTreeApplication.getDatabase().getChildren(personID);
     // For each non-null parent object, find their parents, and other children, and add them too
     for (Person child : childList) {
       if (child.getPersonID().equals(callingChildID)) {
+        // If a child calls this, they will not be included, therefore it is "other children"
+        children = new TreeItem(new Person("Other Children", "...", "...", "...", "..."));
         continue;
       }
       child.setRelation("Child");
       // Create TreeItem for Children
-      TreeItem childN = new TreeItem(child);
+      TreeItem<Person> childN = new TreeItem(child);
       String childNID = child.getPersonID();
       // Call this current function to get children of children
-      TreeItem childrenSub = getChildren(childNID, personID);
+      TreeItem<Person> childrenSub = getChildrenFT(childNID, personID);
       // Add children of children to hierarchy
-      childN.getChildren().add(childrenSub);
+      if (!childrenSub.getChildren().isEmpty()) {
+        childN.getChildren().add(childrenSub);
+      }
       // Call spouse function to get spouse of children
-      TreeItem spouseSub = getSpouse(childNID);
+      TreeItem<Person> spouseSub = getSpouseFT(childNID);
       // Add spouse of children to hierarchy
       childN.getChildren().add(spouseSub);
       // Add Parent 1 Tree Item
@@ -139,21 +154,24 @@ public class ListController {
    * @param personID ID of person to get spouse of
    * @return TreeItem of spouse
    */
-  public TreeItem getSpouse(String personID) {
-    TreeItem spouses= new TreeItem(new Person("Spouse", "...", "...", "...", "..."));
+  public TreeItem<Person> getSpouseFT(String personID) {
+    TreeItem<Person> spouses= new TreeItem(new Person("Spouse", "...", "...", "...", "..."));
     ArrayList<Person> spouseList = FamilyTreeApplication.getDatabase().getSpouse(personID);
     // For each non-null parent object, find their parents, and other children, and add them too
     for (Person spouse : spouseList) {
       spouse.setRelation("Spouse");
       // Create TreeItem for Spouse
-      TreeItem spouseN = new TreeItem(spouse);
+      TreeItem<Person> spouseN = new TreeItem(spouse);
       String spouseNID = spouse.getPersonID();
       // Call parent function to get parents of spouse
-      TreeItem parentsSub = getParents(spouseNID);
+      TreeItem<Person> parentsSub = getParentsFT(spouseNID);
       // Add parents of spouse to hierarchy
-      spouseN.getChildren().add(parentsSub);
+      if (!parentsSub.getChildren().isEmpty()) {
+        spouseN.getChildren().add(parentsSub);
+      }
       // Add Spouse Tree Item
       spouses.getChildren().add(spouseN);
+      // TODO add children note in tree (this persons children are their spouses children)
     }
     return spouses;
   }

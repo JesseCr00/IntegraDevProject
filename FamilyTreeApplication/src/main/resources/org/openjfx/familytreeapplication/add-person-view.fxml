@@ -112,6 +112,10 @@
                <Insets top="10.0" />
             </VBox.margin>
          </SplitPane>
+         <Label fx:id="spouseMessage" text="">
+            <VBox.margin>
+               <Insets top="5.0" />
+            </VBox.margin></Label>
          <HBox prefHeight="100.0" prefWidth="200.0" />
       </VBox>
    </AnchorPane>

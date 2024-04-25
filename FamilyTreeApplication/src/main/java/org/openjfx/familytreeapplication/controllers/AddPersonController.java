@@ -1,22 +1,18 @@
 package org.openjfx.familytreeapplication.controllers;
 
+import static java.lang.Thread.sleep;
+
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.cell.ComboBoxListCell;
-import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.openjfx.familytreeapplication.FamilyTreeApplication;
@@ -34,7 +30,7 @@ public class AddPersonController {
   @FXML
   public TextField genderText;
   @FXML
-  public ComboBox personRelated;
+  public ComboBox<Person> personRelated;
   @FXML
   public RadioButton fatherToggle;
   @FXML
@@ -48,16 +44,27 @@ public class AddPersonController {
   public Button addPersonToTreeButton;
   @FXML
   public Button cancelButton;
+  @FXML
+  public Label spouseMessage;
 
   @FXML
-  public void onAddPersonToTreeButtonClick() throws ParseException, IOException {
-    RadioButton selectedRadio = (RadioButton) relationToggle.getSelectedToggle();
-    Person relatedPersonFromBox = (Person) personRelated.getValue();
-    FamilyTreeApplication.getDatabase()
-        .insertPerson(firstNameText.getText(), lastNameText.getText(), dateOfBirthText.getText(), genderText.getText(),
-            relatedPersonFromBox.getPersonID(), selectedRadio.getText());
-    onCancelButtonClick();
+  public void onAddPersonToTreeButtonClick()
+      throws IOException, InterruptedException {
     // TODO add logic so you cannot submit untill all categories filled in
+    // TODO input validation
+    RadioButton selectedRadio = (RadioButton) relationToggle.getSelectedToggle();
+    Person relatedPersonFromBox = personRelated.getValue();
+    if (selectedRadio.getText().equals("Spouse") && !FamilyTreeApplication.getDatabase().getSpouse(relatedPersonFromBox.getPersonID()).isEmpty()) {
+      spouseMessage.setText("");
+      sleep(200);
+      spouseMessage.setText("This person already has a spouse");
+    } else {
+      FamilyTreeApplication.getDatabase()
+          .insertPerson(firstNameText.getText(), lastNameText.getText(), dateOfBirthText.getText(),
+              genderText.getText(),
+              relatedPersonFromBox.getPersonID(), selectedRadio.getText());
+      onCancelButtonClick();
+    }
   }
 
   @FXML
@@ -71,7 +78,6 @@ public class AddPersonController {
   }
 
   public void initialize() {
-    // TODO add code to populate the dropdown
     Callback<ListView<Person>, ListCell<Person>> cellFactory = new Callback<ListView<Person>, ListCell<Person>>() {
       @Override
       public ListCell<Person> call(ListView<Person> l) {
